@@ -11,3 +11,6 @@ Desktop.ini
 
 # Plugin zips built for uploading
 *.zip
+
+# Project brief: kept on this machine only, never published
+CLAUDE.md
