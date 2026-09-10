@@ -2,7 +2,7 @@
 /**
  * Plugin Name: IEC Events
  * Description: A lightweight upcoming-events list. Adds an Events post type and an [iec_events] shortcode.
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      Inside Edge Capital
  * Requires PHP: 8.0
  */
@@ -11,6 +11,33 @@ defined('ABSPATH') || exit;
 
 /** Fallback timezone whenever none is chosen or an unknown one is submitted. */
 const IEC_DEFAULT_TZ = 'America/New_York';
+
+/** Where the settings page stores everything: one option holding one array. */
+const IEC_OPTION = 'iec_events_options';
+
+/**
+ * Shipped defaults, used until someone saves the settings page and as the
+ * fallback for any value missing from what was saved.
+ */
+function iec_option_defaults() {
+    return [
+        'count'       => 4,
+        'show_desc'   => 0,
+        'title_align' => '',
+    ];
+}
+
+/**
+ * The saved settings, with defaults filled in.
+ *
+ * These become the shortcode's defaults; an attribute written on an individual
+ * shortcode still overrides them.
+ */
+function iec_options() {
+    $saved = get_option(IEC_OPTION, []);
+
+    return array_merge(iec_option_defaults(), is_array($saved) ? $saved : []);
+}
 
 /**
  * The timezones offered in the meta box, and the only values accepted on save.

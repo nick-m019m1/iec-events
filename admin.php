@@ -196,6 +196,131 @@ function iec_admin_pre_get_posts($query) {
 }
 add_action('pre_get_posts', 'iec_admin_pre_get_posts');
 
+/* -------------------------------------------------------------------------
+ * Settings page: Events > Settings
+ * ---------------------------------------------------------------------- */
+
+function iec_settings_menu() {
+    add_submenu_page(
+        'edit.php?post_type=iec_event',
+        'Events Settings',
+        'Settings',
+        'manage_options',
+        'iec-events-settings',
+        'iec_settings_page'
+    );
+}
+add_action('admin_menu', 'iec_settings_menu');
+
+function iec_register_settings() {
+    register_setting('iec_events', IEC_OPTION, [
+        'type'              => 'array',
+        'sanitize_callback' => 'iec_sanitize_options',
+        'default'           => iec_option_defaults(),
+    ]);
+}
+add_action('admin_init', 'iec_register_settings');
+
+/** Never trust the form: rebuild the option from known-good values only. */
+function iec_sanitize_options($input) {
+    $clean = iec_option_defaults();
+    $input = is_array($input) ? $input : [];
+
+    $count          = isset($input['count']) ? absint($input['count']) : $clean['count'];
+    $clean['count'] = max(1, min(12, $count));
+
+    $clean['show_desc'] = empty($input['show_desc']) ? 0 : 1;
+
+    $align = isset($input['title_align']) ? strtolower(trim((string) $input['title_align'])) : '';
+    $clean['title_align'] = in_array($align, ['left', 'center', 'right'], true) ? $align : '';
+
+    return $clean;
+}
+
+function iec_settings_page() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    $options = iec_options();
+    ?>
+    <div class="wrap">
+        <h1>Events Settings</h1>
+        <p>
+            Defaults for the <code>[iec_events]</code> shortcode. An attribute written on an
+            individual shortcode overrides the setting here, so one page can differ from another.
+        </p>
+
+        <form method="post" action="options.php">
+            <?php settings_fields('iec_events'); ?>
+
+            <table class="form-table" role="presentation">
+                <tr>
+                    <th scope="row"><label for="iec_count">Events shown</label></th>
+                    <td>
+                        <input type="number" id="iec_count"
+                               name="<?php echo esc_attr(IEC_OPTION); ?>[count]"
+                               class="small-text" min="1" max="12" step="1"
+                               value="<?php echo esc_attr((string) $options['count']); ?>">
+                        <p class="description">Between 1 and 12. Overridden by <code>count="6"</code>.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Description</th>
+                    <td>
+                        <label>
+                            <input type="checkbox" value="1"
+                                   name="<?php echo esc_attr(IEC_OPTION); ?>[show_desc]"
+                                   <?php checked(1, (int) $options['show_desc']); ?>>
+                            Show each event's description under its title
+                        </label>
+                        <p class="description">
+                            Only events that have a description show one. Overridden by
+                            <code>show_desc="1"</code> or <code>show_desc="0"</code>.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="iec_title_align">Heading alignment</label></th>
+                    <td>
+                        <select id="iec_title_align" name="<?php echo esc_attr(IEC_OPTION); ?>[title_align]">
+                            <?php
+                            $choices = [
+                                ''       => 'Theme default',
+                                'left'   => 'Left',
+                                'center' => 'Centred',
+                                'right'  => 'Right',
+                            ];
+                            foreach ($choices as $value => $label) :
+                                ?>
+                                <option value="<?php echo esc_attr($value); ?>"
+                                    <?php selected($options['title_align'], $value); ?>>
+                                    <?php echo esc_html($label); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description">
+                            Aligns the list heading only, not the events. Overridden by
+                            <code>title_align="center"</code>.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <?php submit_button(); ?>
+        </form>
+
+        <h2>Using it on a page</h2>
+        <p>
+            Add a Shortcode block and paste <code>[iec_events title="Upcoming Events (ET Time)" tz_label="ET"]</code>.
+            Other attributes: <code>count</code>, <code>show_desc</code>, <code>title_align</code>,
+            <code>show_thumb</code>, <code>class</code>. Leave <code>tz_label</code> off to show
+            EST or EDT automatically.
+        </p>
+    </div>
+    <?php
+}
+
 /** All | Upcoming | Past links above the list table. */
 function iec_event_views($views) {
     $current = isset($_GET['iec_view']) ? sanitize_key(wp_unslash($_GET['iec_view'])) : '';

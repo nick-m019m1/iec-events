@@ -82,18 +82,22 @@ function iec_css() {
  * [iec_events count="4" title="Upcoming Events (ET Time)" tz_label="ET"]
  *
  * Also accepts title_align (left, center or right — blank inherits the theme),
- * show_thumb, show_desc and class. Outputs nothing at all when no
+ * show_thumb, show_desc and class. Count, show_desc and title_align default to
+ * whatever is saved on Events > Settings. Outputs nothing at all when no
  * event is upcoming, heading included: an empty "Upcoming Events" box on a
  * quiet week looks broken.
  */
 function iec_events_shortcode($atts) {
+    // Saved settings supply the defaults; an attribute on the shortcode wins.
+    $options = iec_options();
+
     $atts = shortcode_atts([
-        'count'       => 4,
+        'count'       => $options['count'],
         'title'       => '',
-        'title_align' => '',
+        'title_align' => $options['title_align'],
         'tz_label'    => '',
         'show_thumb'  => 0,
-        'show_desc'   => 0,
+        'show_desc'   => $options['show_desc'],
         'class'       => '',
     ], $atts, 'iec_events');
 
