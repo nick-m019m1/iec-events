@@ -1,0 +1,10 @@
+# Windows / macOS file manager droppings
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor scratch files
+*.swp
+*~
+.vscode/
+.idea/
