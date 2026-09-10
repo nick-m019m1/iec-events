@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: IEC Events
- * Description: A lightweight upcoming-events list. Adds an Events post type and, once render.php lands, an [iec_events] shortcode.
- * Version:     0.1.0
+ * Description: A lightweight upcoming-events list. Adds an Events post type and an [iec_events] shortcode.
+ * Version:     1.0.0
  * Author:      Inside Edge Capital
  * Requires PHP: 8.0
  */
@@ -172,6 +172,8 @@ function iec_save_event($post_id) {
     update_post_meta($post_id, '_iec_description', $desc);
 }
 add_action('save_post_iec_event', 'iec_save_event');
+
+require_once __DIR__ . '/render.php';
 
 if (is_admin()) {
     require_once __DIR__ . '/admin.php';
