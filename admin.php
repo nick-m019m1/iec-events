@@ -70,7 +70,7 @@ function iec_render_meta_box($post) {
             <th scope="row"><label for="iec_duration">Duration</label></th>
             <td>
                 <input type="number" id="iec_duration" name="iec_duration" class="small-text"
-                       min="1" step="5" value="<?php echo esc_attr((string) $duration); ?>"> minutes
+                       min="1" step="1" value="<?php echo esc_attr((string) $duration); ?>"> minutes
                 <p class="description">The event drops off the list once this much time has passed.</p>
             </td>
         </tr>

@@ -8,3 +8,6 @@ Desktop.ini
 *~
 .vscode/
 .idea/
+
+# Plugin zips built for uploading
+*.zip
