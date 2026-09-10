@@ -56,6 +56,9 @@ function iec_css() {
     return '<style id="iec-events-css">
 .iec-events{--iec-accent:currentColor}
 .iec-events-title{margin:0 0 .75em}
+.iec-events-title.iec-align-left{text-align:left}
+.iec-events-title.iec-align-center{text-align:center}
+.iec-events-title.iec-align-right{text-align:right}
 .iec-events-list{list-style:none;margin:0;padding:0}
 .iec-event{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.5em 1em;
  align-items:start;padding:.85em 0;border-bottom:1px solid rgba(0,0,0,.12)}
@@ -78,18 +81,20 @@ function iec_css() {
 /**
  * [iec_events count="4" title="Upcoming Events (ET Time)" tz_label="ET"]
  *
- * Also accepts show_thumb, show_desc and class. Outputs nothing at all when no
+ * Also accepts title_align (left, center or right — blank inherits the theme),
+ * show_thumb, show_desc and class. Outputs nothing at all when no
  * event is upcoming, heading included: an empty "Upcoming Events" box on a
  * quiet week looks broken.
  */
 function iec_events_shortcode($atts) {
     $atts = shortcode_atts([
-        'count'      => 4,
-        'title'      => '',
-        'tz_label'   => '',
-        'show_thumb' => 0,
-        'show_desc'  => 0,
-        'class'      => '',
+        'count'       => 4,
+        'title'       => '',
+        'title_align' => '',
+        'tz_label'    => '',
+        'show_thumb'  => 0,
+        'show_desc'   => 0,
+        'class'       => '',
     ], $atts, 'iec_events');
 
     $count      = max(1, min(12, (int) $atts['count']));
@@ -97,6 +102,12 @@ function iec_events_shortcode($atts) {
     $tz_label   = trim((string) $atts['tz_label']);
     $show_thumb = iec_flag($atts['show_thumb']);
     $show_desc  = iec_flag($atts['show_desc']);
+
+    // Left blank the heading inherits the theme's alignment, as it always has.
+    $align = strtolower(trim((string) $atts['title_align']));
+    if (!in_array($align, ['left', 'center', 'right'], true)) {
+        $align = '';
+    }
 
     $query = iec_get_events($count);
     if (!$query->have_posts()) {
@@ -112,7 +123,8 @@ function iec_events_shortcode($atts) {
     $out .= '<div class="' . esc_attr(implode(' ', array_filter($classes))) . '">';
 
     if ('' !== $title) {
-        $out .= '<h3 class="iec-events-title">' . esc_html($title) . '</h3>';
+        $heading_class = 'iec-events-title' . ('' !== $align ? ' iec-align-' . $align : '');
+        $out .= '<h3 class="' . esc_attr($heading_class) . '">' . esc_html($title) . '</h3>';
     }
 
     $out .= '<ul class="iec-events-list">';
